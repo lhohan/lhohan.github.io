@@ -2,7 +2,7 @@
 layout: post
 title:  "Welcome!"
 date:   2014-02-16 14:42:48
-categories: lhohan
+categories: about_me
 ---
 
 Years ago I had a blog and even one what was then called 'a homepage'.
