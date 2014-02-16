@@ -1,0 +1,11 @@
+---
+layout: post
+title:  "Welcome!"
+date:   2014-02-16 14:42:48
+categories: lhohan
+---
+
+Years ago I had a blog and even one what was then called 'a homepage'.
+The past time I have mostly been sharing thoughts and [my interests on Twitter][twitter-hanlho] but I have some ideas that would require more than 140 characters.
+
+[twitter-hanlho][https://twitter.com/hanlho]
