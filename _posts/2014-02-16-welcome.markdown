@@ -6,6 +6,6 @@ categories: about_me
 ---
 
 Years ago I had a blog and even one what was then called 'a homepage'.
-The past time I have mostly been sharing thoughts and [my interests on Twitter][twitter-hanlho] but I have some ideas that would require more than 140 characters so I created this blog reboot page.
+The past time I have mostly been sharing [my thoughts and interests on Twitter][twitter-hanlho] but I have some ideas that would require more than 140 characters so I created this blog reboot page.
 
 [twitter-hanlho]: https://twitter.com/hanlho
