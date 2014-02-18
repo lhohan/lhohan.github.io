@@ -28,6 +28,11 @@ Here is an alternate implementation of FizzBuzz using the [Stream](http://www.sc
 and infinite stream of integers and we map them using a function according to the FizzBuzz specification. We then take
 the first `n` of this infinite list and convert it to a 'normal' Scala List.
 
+To print the first 100:
+{% highlight scala lineno %}
+  fizzbuzz(100).foreach{ println(_) }
+{% endhighlight %}
+
 As a little extra, this how we could test our FizzBuzz implementation using [ScalaCheck](http://www.scalacheck.org/):
 
 {% gist lhohan/9039481 %}
