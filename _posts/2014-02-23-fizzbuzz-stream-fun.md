@@ -33,7 +33,7 @@ To print the first 100:
   fizzbuzz(100).foreach{ println(_) }
 {% endhighlight %}
 
-As a little extra, this how we could test our FizzBuzz implementation using [ScalaCheck](http://www.scalacheck.org/):
+As a little extra, this is how we could test our FizzBuzz implementation using [ScalaCheck](http://www.scalacheck.org/):
 
 {% gist lhohan/9039481 %}
 
