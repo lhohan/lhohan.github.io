@@ -15,7 +15,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <link rel="stylesheet" href="css/reveal.min.css">
-    <link rel="stylesheet" href="css/theme/default.css" id="theme">
+    <link rel="stylesheet" href="css/theme/moon.css" id="theme">
 
     <!-- For syntax highlighting -->
     <link rel="stylesheet" href="lib/css/zenburn.css">
@@ -46,14 +46,19 @@
     <!-- Any section element inside of this container is displayed as a slide -->
     <div class="slides">
 
-        <section data-transition="linear" data-markdown>
+        <section data-markdown>
             <script type="text/template">
-                #Reactive applications
                 ##Scaladays 2014
             </script>
         </section>
 
-        <section data-transition="linear" data-markdown>
+        <section data-markdown>
+            <script type="text/template">
+                #Reactive applications
+            </script>
+        </section>
+
+        <section data-markdown>
             <script type="text/template">
                 ##Monitoring
 
@@ -66,14 +71,14 @@
             </script>
         </section>
 
-        <section data-transition="linear" data-markdown>
+        <section data-markdown>
             <script type="text/template">
-                    lala
+
             </script>
         </section>
 
 
-        <section data-transition="linear" data-markdown>
+        <section data-markdown>
             <script type="text/template">
                 ##THE END
 
@@ -151,13 +156,13 @@
                 previewLinks: false,
 
                 // Transition style
-                transition: 'default', // default/cube/page/concave/zoom/linear/fade/none
+                transition: 'fade', // default/cube/page/concave/zoom/linear/fade/none
 
                 // Transition speed
                 transitionSpeed: 'default', // default/fast/slow
 
                 // Transition style for full page slide backgrounds
-                backgroundTransition: 'slide', // default/none/slide/concave/convex/zoom
+                backgroundTransition: 'zoom', // default/none/slide/concave/convex/zoom
 
                 // Number of slides away from the current that are visible
                 viewDistance: 3,
@@ -169,7 +174,7 @@
                 //parallaxBackgroundSize: '' // CSS syntax, e.g. "2100px 900px"
 
 				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
-				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+				transition: Reveal.getQueryHash().transition || 'linear', // default/cube/page/concave/zoom/linear/fade/none
 
 				// Parallax scrolling
 				// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
