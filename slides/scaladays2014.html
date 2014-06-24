@@ -52,9 +52,53 @@
             </script>
         </section>
 
+        <section data-markdown data-background="img_scaladays2014/take_a_look_inside.jpg" parallaxBackgroundImage="200px">
+            <script type="text/template">
+                ##Scaladays 2014
+            </script>
+        </section>
+
         <section data-markdown>
             <script type="text/template">
                 #Reactive applications
+            </script>
+        </section>
+
+        <section data-markdown>
+            <script type="text/template">
+                ## The 4 traits of Reactive Applications
+
+
+            </script>
+        </section>
+
+        <section data-markdown>
+            <script type="text/template">
+                # Blah
+
+                - Amdahl's Law => stack needs to be reactive all the way down
+                - Queueing theory => when your system runs near full capacity your performance is impacted dramatically (also apply to teams and everything else) "maths doesn't lie and it is going to hunt you down"
+
+                Tips for the better
+
+                - Smart batching to amortize extensive calls
+                - Apply backpressure using bounded queues (signal you are 'full' instead of accepting the one request that will make you crash
+                - non blocking design
+                - don't hog resources (by being sequential)
+                - enables smart batching (and scalability and resilience...)
+                - example: servlet in J2ee will block thread, socket, incoming state and prevent gc'ing as well! => spray!
+
+
+            </script>
+        </section>
+
+        <section data-markdown>
+            <script type="text/template">
+                ##Akka
+
+                - Assume failure - at application level
+                  - Especially when we move to the cloud
+
             </script>
         </section>
 
@@ -71,12 +115,17 @@
             </script>
         </section>
 
-        <section data-markdown>
+        <section data-markdown data-background="img_scaladays2014/winter_is_coming2.jpg">
             <script type="text/template">
-
+                <!--{ text-align: left; }-->
+                <p style="text-align:left;color:black;" class="fragment roll-in">The Internet of Things</p>
+                <p style="text-align:left;color:black;" class="fragment roll-in">React 2014 : Martin Thompson<br/>Responding in a Timely Manner</a></p>
+                <aside class="notes">
+                    The Internet of Things
+                    may be not our market - or is it not?
+                </aside>
             </script>
         </section>
-
 
         <section data-markdown>
             <script type="text/template">
@@ -156,13 +205,13 @@
                 previewLinks: false,
 
                 // Transition style
-                transition: 'fade', // default/cube/page/concave/zoom/linear/fade/none
+                transition: 'default', // default/cube/page/concave/zoom/linear/fade/none
 
                 // Transition speed
                 transitionSpeed: 'default', // default/fast/slow
 
                 // Transition style for full page slide backgrounds
-                backgroundTransition: 'zoom', // default/none/slide/concave/convex/zoom
+                backgroundTransition: 'concave', // default/none/slide/concave/convex/zoom
 
                 // Number of slides away from the current that are visible
                 viewDistance: 3,
