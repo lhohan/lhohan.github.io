@@ -6,8 +6,8 @@ categories: scala runtime spray
 author: hans_l'hoest
 ---
 
-Recently we developed a web client in Scala to start a Mendix application using only JSON commands similar as to how m2ee tools works.
-In this post we will explain how to convert nested `Map`s in Scala to JSON using the [spray-json](https://github.com/spray/spray-json) library.
+Recently we developed a web client in Scala to start a Mendix application using only JSON commands similar as to how m2ee-tools works.
+In this post I will explain how to convert nested `Map`s in Scala to JSON using the [spray-json](https://github.com/spray/spray-json) library.
 
 It is a basic example to show how easy it is the convert your own types into JSON using the default infrastructure provided by spray-json and
 at the same time works around an issue in the library where these kind of `Map`s are not supported.
