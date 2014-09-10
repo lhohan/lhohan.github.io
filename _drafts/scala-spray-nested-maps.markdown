@@ -61,12 +61,11 @@ class JsonTest extends FunSuite {
       )
     )
 
-    assertResult( """{"param1":"value1","param2":"2","param3":{"param4":"value4","param5":{"param6":"value6","param7":"value7"}}}""") {  // 1
+    assertResult( """{"param1":"value1","param2":2,"param3":{"param4":"value4","param5":{"param6":"value6","param7":"value7"}}}""") {  // 1
       testMap.toJson.toString()  // 2
     }
   }
 }
-
 ```
 
 (1): the expected result all in a one liner for convenience so we do not have to worry about new lines etc. for verifying the result.
@@ -94,21 +93,23 @@ object M2eeJsonProtocol extends DefaultJsonProtocol {
     def write(m: Map[String, Any]) = {
       JsObject(m.map {                                                 // 2
         case (k, v) => v match {
-          case v: String => (k, JsString(v))
-          case v: Map[String, Any] => (k, write(v))                    // 3
-          case _ => (k, JsString(v.toString))                          // 4
+          case v: String => (k, JsString(v))                           // 3
+          case v: Int => (k, JsNumber(v))
+          case v: Map[String, Any] => (k, write(v))                    // 4
+          case _ => (k, JsString(v.toString))                          // 5
         }
       })
     }
 
-    def read(value: JsValue) = ???                                     // 5
+    def read(value: JsValue) = ???                                     // 6
   }
 }
 ```
 
 We implement a [JsonFormat](https://github.com/spray/spray-json#jsonprotocol) which is part of the default infrastructure `spray-json` provides to support custom conversions. 
 We extend JsonFormat parametrized with the type we want to convert, in our case `Map[String, Any]` (1). 
-We return a `JsObject` (2) initialized with the result of mapping each element (2) to a key value pair for which we convert every value. 
+We return a `JsObject` (2) initialized with the result of mapping each element (2) to a key value pair for which we convert every value as needed. 
+We convert explicitly `String` and `Int` to their respective `JsValue` types (3). A further improvement to figure out a way to use `toJson` on any type but this suffices for what we need to make our test pass and request in practice.  
 If this value is of type `Map[String, Any]` (3) we make a recursive call, this the main construct that makes our conversion work. 
 Otherwise we simply convert to a string (4), this is all we need for now, in case of numbers or other structures this implementation can be relatively easy extended.
 
@@ -139,8 +140,12 @@ Running our test again:
 [info] All tests passed.
 ```
 
+TODO : improvements to be made:
+
+* the type erasure warning
+
 Code project with failing test is [here] (https://github.com/lhohan/spray-json-pg/tree/d56776b0a1d5c96338065abe6dcd9b179c92c429).
 
-Code project with the fix is [here] (https://github.com/lhohan/spray-json-pg/tree/65d4f4b4b84af9577cad213e7c3e0a1f0377b1ef).
+Code project with the fix is [here] (https://github.com/lhohan/spray-json-pg/tree/84dd18227e8a6c488a502e8dbab0d0acfc0cddfd).
 
 In case of questions or useful additions please to not hesitate to leave a comment.
