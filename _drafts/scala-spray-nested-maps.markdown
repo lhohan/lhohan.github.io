@@ -63,7 +63,8 @@ class JsonTest extends FunSuite {
       )
     )
 
-    assertResult( """{"param1":"value1","param2":2,"param3":{"param4":"value4","param5":{"param6":"value6","param7":"value7"}}}""") {  // 1
+    assertResult( """{"param1":"value1","param2":2,"param3":{"param4":
+  "value4","param5":{"param6":"value6","param7":"value7"}}}""") {  // 1
       testMap.toJson.toString()  // 2
     }
   }
@@ -93,17 +94,15 @@ object M2eeJsonProtocol extends DefaultJsonProtocol {
 
   implicit object MapJsonFormat extends JsonFormat[Map[String, Any]] { // 1
     def write(m: Map[String, Any]) = {
-      JsObject(m.map {                                                 // 2
-        case (k, v) => v match {
-          case v: String => (k, JsString(v))                           // 3
-          case v: Int => (k, JsNumber(v))
-          case v: Map[String, Any] => (k, write(v))                    // 4
-          case _ => (k, JsString(v.toString))                          // 5
-        }
+      JsObject(m.mapValues {                  // 2
+        case v: String => JsString(v)         // 3
+        case v: Int => JsNumber(v)
+        case v: Map[String, Any] => write(v)  // 4
+        case v: Any => JsString(v.toString)   // 5
       })
     }
 
-    def read(value: JsValue) = ???                                     // 6
+    def read(value: JsValue) = ???            // 6
   }
 }
 ```
@@ -143,12 +142,84 @@ Running our test again:
 [info] All tests passed.
 ```
 
-TODO : improvements to be made:
-
-* the type erasure warning
-
-Code project with failing test is [here] (https://github.com/lhohan/spray-json-pg/tree/d56776b0a1d5c96338065abe6dcd9b179c92c429).
+Code project with failing test is [here] (https://github.com/lhohan/spray-json-pg/tree/e2cda87713d6f835d756acafe9fc8f247cb23b4b).
 
 Code project with the fix is [here] (https://github.com/lhohan/spray-json-pg/tree/84dd18227e8a6c488a502e8dbab0d0acfc0cddfd).
 
-In case of questions or useful additions please to not hesitate to leave a comment.
+Extra: removing the warning
+---------
+
+A little extra and a little of topic but you probably noticed the warning: 
+
+```scala
+[warn] .../src/main/scala/M2eeJsonProtocol.scala:10: non-variable type argument 
+String in type pattern Map[String,Any] is unchecked since it is eliminated by 
+erasure
+[warn]           case v: Map[String, Any] => (k, write(v))                    // 4
+[warn]                   ^
+[warn] one warning found
+```
+
+As Scala is running on the jvm and types are erased the case pattern at (4) will not only match the `Map[String, Any]` type but *any* `Map` type.
+Since we know we are only matching for `Map`s with keys of type `String` we are not looking to deal with other typed `Map`s, if this would 
+happen it may crash with e.g. a ClassCastException but that's OK too, we'd rather crash hard in such cases. If want
+to cover our bases we might even write an extra test to capture this behaviour but that is not our goal now. We just want to
+get rid of the compiler warning.
+
+There are various ways of removing this warning and it can get more complicated pretty fast: 
+
+  - Matching on `Map[_,_]`, with or without checking all keys for `String` type, and make an explicit cast using `asInstanceOf` in the recursive call.
+  - using manifest (but deprecated in Scala 2.10) 
+  - using scalaz
+  - using `TypeTag`s
+  - using `scala.reflect.runtime` but this is (strongly discouraged)[http://www.scala-lang.org/news/2.11.1]
+
+Most suggestions can be investigated more through following [stackoverflow question](http://stackoverflow.com/questions/1094173/how-do-i-get-around-type-erasure-on-scala-or-why-cant-i-get-the-type-paramete).
+
+Ideally I would like [this Scala improvement](https://issues.scala-lang.org/browse/SI-6517) but meanwhile the easiest fix is this:
+
+```scala
+import spray.json._
+
+object M2eeJsonProtocol extends DefaultJsonProtocol {
+
+  type StringToAny = Map[String, Any]
+
+  implicit object MapJsonFormat extends JsonFormat[Map[String, Any]] { // 1
+    def write(m: Map[String, Any]) = {
+      JsObject(m.mapValues {                  // 2
+        case v: String => JsString(v)         // 3
+        case v: Int => JsNumber(v)
+        case v: StringToAny => write(v)  // 4
+        case v: Any => JsString(v.toString)   // 5
+      })
+    }
+
+    def read(value: JsValue) = ???            // 6
+  }
+}
+
+```
+
+But doesn't this all seem to be nothing but a rephrasing, some syntactic rearrangement, of the same thing?
+It is and the above works in Scala 2.10 but when upgrading to Scala 2.11 the compiler has become smarter and figured it out:
+
+```scala
+[warn] .../src/main/scala/M2eeJsonProtocol.scala:12: non-variable type argument 
+String in type pattern  scala.collection.immutable.Map[String,Any] (the 
+underlying of M2eeJsonProtocol.StringToAny) is unchecked since it is eliminated 
+by erasure
+[warn]         case v: StringToAny => write(v)  // 4
+[warn]                 ^
+[warn] one warning found
+```
+
+A [quick non-elegant fix](https://github.com/lhohan/spray-json-pg/tree/bd518fd7e0217ac3b5473aa4b016083826b744ff) would be to replace (4) with:
+
+```scala
+case v: Map[_, _] => write(v.asInstanceOf[Map[String, Any]])  // 4
+```
+
+
+
+In case of questions or additions please to not hesitate to leave a comment.
