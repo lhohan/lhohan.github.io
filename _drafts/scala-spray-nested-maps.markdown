@@ -6,11 +6,12 @@ categories: scala runtime spray
 author: hans_l'hoest
 ---
 
-Recently we developed a web client in Scala to start a Mendix application using only JSON commands similar as to how m2ee-tools works.
+Recently we developed a web client in Scala to start a Mendix application using only JSON commands similar as to how (m2ee-tools)[https://github.com/mendix/m2ee-tools/] works.
 In this post I will explain how to convert nested `Map`s in Scala to JSON using the [spray-json](https://github.com/spray/spray-json) library.
 
-It is a basic example to show how easy it is the convert your own types into JSON using the default infrastructure provided by spray-json and
-at the same time works around an issue in the library where these kind of `Map`s are not supported.
+It is a basic example to show how easy it is the convert your own types to JSON using the default infrastructure provided by spray-json and
+at the same time works around an issue in the library where nested `Map`s are not supported. At end the source code is also included in the form 
+of a fully functional `sbt` project as well.
 
 A JSON command sent to the server (the Mendix Runtime) to execute an action typically looks like:
 
@@ -27,17 +28,18 @@ A JSON command sent to the server (the Mendix Runtime) to execute an action typi
 }
 ```
 
-The `params` section is used to pass arguments to any potential action we support or may support in the future.
-Meaning it can contain a hierarchical structure as shown.
+The `params` section is used to pass arguments for any potential action we support or may support in the future.
+Meaning it can contain a hierarchical structure.
 
 In Scala code we represent this structure not surprisingly with a `Map`:
 
 ```scala
-Map("param1" -> "value1", param2 -> 2, "param3" -> Map("param4" -> "value4"))
+Map("action" -> "action_name", "param2" -> 2, "param3" -> Map("param4" -> "value4"))
 ```
 
-To marshall Scala objects to JSON we are using a neat, easy to use, light-weight library called [spray-json](https://github.com/spray/spray-json).
-It offers auto conversion of standard Scala types to JSON including collections.
+To marshall Scala objects to JSON we are using an easy to use, light-weight library called [spray-json](https://github.com/spray/spray-json).
+The documentation of this library is pretty solid so there’s no need to go over basics. The feature we go into a bit deeper here is its
+ (auto) conversion of standard Scala types to JSON including collections.
 
 To test the conversion we need, we write following test case using ScalaTest and a more complicated `Map` structure:
 
@@ -108,12 +110,13 @@ object M2eeJsonProtocol extends DefaultJsonProtocol {
 
 We implement a [JsonFormat](https://github.com/spray/spray-json#jsonprotocol) which is part of the default infrastructure `spray-json` provides to support custom conversions. 
 We extend JsonFormat parametrized with the type we want to convert, in our case `Map[String, Any]` (1). 
-We return a `JsObject` (2) initialized with the result of mapping each element (2) to a key value pair for which we convert every value as needed. 
-We convert explicitly `String` and `Int` to their respective `JsValue` types (3). A further improvement to figure out a way to use `toJson` on any type but this suffices for what we need to make our test pass and request in practice.  
-If this value is of type `Map[String, Any]` (3) we make a recursive call, this the main construct that makes our conversion work. 
-Otherwise we simply convert to a string (4), this is all we need for now, in case of numbers or other structures this implementation can be relatively easy extended.
+We return a `JsObject` initialized with the result of mapping each element (2) meanwhile converting each `Map` value as needed to its appropriate `JsValue` object.
+As you can see, we explicitly convert`String` and `Int` (3).  
+Type `Map[String, Any]` (4) is handled recursively: this the main construct which makes our conversion work. 
+All other types we simply convert to a string (5); a further improvement could be to convert *any* type (say by using `toJson`), 
+but this suffices to make our test pass and JSON requests work in practice.
 
-The read part we do not need, so we leave it unimplemented (5).     
+The read part we do not need, so we leave it unimplemented (6).     
 
 The only thing left to do is bring this implicit converter into scope by adding an import statement (1) to our test class:
 
