@@ -11,7 +11,7 @@ In this post I will explain how to convert nested `Map`s in Scala to JSON using 
 
 It is a basic example to show how easy it is the convert your own types to JSON using the default infrastructure provided by spray-json and
 at the same time works around an issue in the library where nested `Map`s are not supported. At end the source code is also included in the form 
-of a fully functional `sbt` project as well.
+of [a fully functional `sbt` project](https://github.com/lhohan/spray-json-pg) as well.
 
 A JSON command sent to the server (the Mendix Runtime) to execute an action typically looks like:
 
@@ -40,6 +40,9 @@ Map("action" -> "action_name", "param2" -> 2, "param3" -> Map("param4" -> "value
 To marshall Scala objects to JSON we are using an easy to use, light-weight library called [spray-json](https://github.com/spray/spray-json).
 The documentation of this library is pretty solid so there’s no need to go over basics. The feature we go into a bit deeper here is its
  (auto) conversion of standard Scala types to JSON including collections.
+
+Test first
+-------
 
 To test the conversion we need, we write following test case using ScalaTest and a more complicated `Map` structure:
 
@@ -84,6 +87,9 @@ Can not find JsonWriter or JsonFormat type class for scala.collection.immutable.
 ```
 
 So conversion of nested `Map`s does not work out of the box and it is [currently an open issue](https://github.com/spray/spray-json/issues/33).
+
+Implementation
+------
 
 In order to make this work, here is how to implement our own [Json protocol](https://github.com/spray/spray-json#jsonprotocol) that handles nested `Map`s:
 
@@ -146,10 +152,15 @@ Code project with failing test is [here] (https://github.com/lhohan/spray-json-p
 
 Code project with the fix is [here] (https://github.com/lhohan/spray-json-pg/tree/84dd18227e8a6c488a502e8dbab0d0acfc0cddfd).
 
-Extra: removing the warning
+See concludes the the main part of this post on converting JSON from our Scala class files. 
+If you want to get rid of the compiler warning, keep on reading.
+
+In case of questions, suggestions or additions please to not hesitate to leave a comment or contact me.
+
+Addendum: removing the warning
 ---------
 
-A little extra and a little of topic but you probably noticed the warning: 
+Off topic but you probably noticed the warning: 
 
 ```scala
 [warn] .../src/main/scala/M2eeJsonProtocol.scala:10: non-variable type argument 
@@ -162,7 +173,7 @@ erasure
 
 As Scala is running on the jvm and types are erased the case pattern at (4) will not only match the `Map[String, Any]` type but *any* `Map` type.
 Since we know we are only matching for `Map`s with keys of type `String` we are not looking to deal with other typed `Map`s, if this would 
-happen it may crash with e.g. a ClassCastException but that's OK too, we'd rather crash hard in such cases. If want
+happen it may crash with e.g. a ClassCastException but that's OK too, we'd rather crash hard in such cases. If we would want
 to cover our bases we might even write an extra test to capture this behaviour but that is not our goal now. We just want to
 get rid of the compiler warning.
 
@@ -176,7 +187,7 @@ There are various ways of removing this warning and it can get more complicated 
 
 Most suggestions can be investigated more through following [stackoverflow question](http://stackoverflow.com/questions/1094173/how-do-i-get-around-type-erasure-on-scala-or-why-cant-i-get-the-type-paramete).
 
-Ideally I would like [this Scala improvement](https://issues.scala-lang.org/browse/SI-6517) but meanwhile the easiest fix is this:
+Ideally I would like [this Scala improvement](https://issues.scala-lang.org/browse/SI-6517) but a rather easy fix is this:
 
 ```scala
 import spray.json._
@@ -214,12 +225,11 @@ by erasure
 [warn] one warning found
 ```
 
-A [quick non-elegant fix](https://github.com/lhohan/spray-json-pg/tree/bd518fd7e0217ac3b5473aa4b016083826b744ff) would be to replace (4) with:
+Our [quick, relatively straight-forward, however not-the-most-elegant fix](https://github.com/lhohan/spray-json-pg/tree/bd518fd7e0217ac3b5473aa4b016083826b744ff) then would be to replace (4) with:
 
 ```scala
 case v: Map[_, _] => write(v.asInstanceOf[Map[String, Any]])  // 4
 ```
 
-
-
-In case of questions or additions please to not hesitate to leave a comment.
+This removes the warning in both Scala 2.10 and 2.11. If one day we revisit this item and a more elegant solution would
+come up we'll keep you posted.
