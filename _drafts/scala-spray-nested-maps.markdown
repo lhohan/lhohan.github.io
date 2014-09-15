@@ -6,12 +6,12 @@ categories: scala runtime spray
 author: hans_l'hoest
 ---
 
-Recently we developed a web client in Scala to start a Mendix application using only JSON commands similar as to how (m2ee-tools)[https://github.com/mendix/m2ee-tools/] works.
+Recently we developed a web client in Scala to start a Mendix application using only JSON commands similar as to how [m2ee-tools](https://github.com/mendix/m2ee-tools/) works.
 In this post I will explain how to convert nested `Map`s in Scala to JSON using the [spray-json](https://github.com/spray/spray-json) library.
 
 It is a basic example to show how easy it is the convert your own types to JSON using the default infrastructure provided by spray-json and
-at the same time works around an issue in the library where nested `Map`s are not supported. At end the source code is also included in the form 
-of [a fully functional `sbt` project](https://github.com/lhohan/spray-json-pg) as well.
+at the same time works around an issue in the library where nested `Map`s are not supported. The source code is also included 
+as [a fully functional `sbt` project](https://github.com/lhohan/spray-json-pg) as well.
 
 A JSON command sent to the server (the Mendix Runtime) to execute an action typically looks like:
 
@@ -38,7 +38,7 @@ Map("action" -> "action_name", "param2" -> 2, "param3" -> Map("param4" -> "value
 ```
 
 To marshall Scala objects to JSON we are using an easy to use, light-weight library called [spray-json](https://github.com/spray/spray-json).
-The documentation of this library is pretty solid so there’s no need to go over basics. The feature we go into a bit deeper here is its
+The documentation of this library is pretty solid so there’s no need to go over the basics really. The feature we go into a bit deeper here is its
  (auto) conversion of standard Scala types to JSON including collections.
 
 Test first
@@ -116,14 +116,14 @@ object M2eeJsonProtocol extends DefaultJsonProtocol {
 We implement a [JsonFormat](https://github.com/spray/spray-json#jsonprotocol) which is part of the default infrastructure `spray-json` provides to support custom conversions. 
 We extend JsonFormat parametrized with the type we want to convert, in our case `Map[String, Any]` (1). 
 We return a `JsObject` initialized with the result of mapping each element (2) meanwhile converting each `Map` value as needed to its appropriate `JsValue` object.
-As you can see, we explicitly convert`String` and `Int` (3).  
+As you can see, we explicitly convert `String` and `Int` (3).  
 Type `Map[String, Any]` (4) is handled recursively: this the main construct which makes our conversion work. 
 All other types we simply convert to a string (5); a further improvement could be to convert *any* type (say by using `toJson`), 
 but this suffices to make our test pass and JSON requests work in practice.
 
 The read part we do not need, so we leave it unimplemented (6).     
 
-The only thing left to do is bring this implicit converter into scope by adding an import statement (1) to our test class:
+The only thing left to do is to bring this implicit converter into scope by adding an import statement (1) to our test class:
 
 ```scala
 import org.scalatest.FunSuite
@@ -152,8 +152,8 @@ Code project with failing test is [here] (https://github.com/lhohan/spray-json-p
 
 Code project with the fix is [here] (https://github.com/lhohan/spray-json-pg/tree/84dd18227e8a6c488a502e8dbab0d0acfc0cddfd).
 
-See concludes the the main part of this post on converting JSON from our Scala class files. 
-If you want to get rid of the compiler warning, keep on reading.
+This concludes the main part of this post on our Scala classes into JSON. 
+(If you want to get rid of the compiler warning, keep on reading.)
 
 In case of questions, suggestions or additions please to not hesitate to leave a comment or contact me.
 
@@ -171,7 +171,7 @@ erasure
 [warn] one warning found
 ```
 
-As Scala is running on the jvm and types are erased the case pattern at (4) will not only match the `Map[String, Any]` type but *any* `Map` type.
+As Scala is running on the jvm types are erased at runtime and the case pattern at (4) will not only match the `Map[String, Any]` type but *any* `Map` type.
 Since we know we are only matching for `Map`s with keys of type `String` we are not looking to deal with other typed `Map`s, if this would 
 happen it may crash with e.g. a ClassCastException but that's OK too, we'd rather crash hard in such cases. If we would want
 to cover our bases we might even write an extra test to capture this behaviour but that is not our goal now. We just want to
@@ -183,7 +183,7 @@ There are various ways of removing this warning and it can get more complicated 
   - using manifest (but deprecated in Scala 2.10) 
   - using scalaz
   - using `TypeTag`s
-  - using `scala.reflect.runtime` but this is (strongly discouraged)[http://www.scala-lang.org/news/2.11.1]
+  - using `scala.reflect.runtime` but this is [strongly discouraged](http://www.scala-lang.org/news/2.11.1) (which I find somewhat confusing)
 
 Most suggestions can be investigated more through following [stackoverflow question](http://stackoverflow.com/questions/1094173/how-do-i-get-around-type-erasure-on-scala-or-why-cant-i-get-the-type-paramete).
 
@@ -213,7 +213,7 @@ object M2eeJsonProtocol extends DefaultJsonProtocol {
 ```
 
 But doesn't this all seem to be nothing but a rephrasing, some syntactic rearrangement, of the same thing?
-It is and the above works in Scala 2.10 but when upgrading to Scala 2.11 the compiler has become smarter and figured it out:
+It is and the above *only works in Scala 2.10* but when upgrading to Scala 2.11 the compiler has become smarter and figured it out:
 
 ```scala
 [warn] .../src/main/scala/M2eeJsonProtocol.scala:12: non-variable type argument 
@@ -231,5 +231,5 @@ Our [quick, relatively straight-forward, however not-the-most-elegant fix](https
 case v: Map[_, _] => write(v.asInstanceOf[Map[String, Any]])  // 4
 ```
 
-This removes the warning in both Scala 2.10 and 2.11. If one day we revisit this item and a more elegant solution would
-come up we'll keep you posted.
+This removes the warning in both Scala 2.10 and 2.11. If one day we revisit this item and a more elegant solution
+comes up we'll keep you posted.
