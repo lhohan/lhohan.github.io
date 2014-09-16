@@ -38,6 +38,7 @@ Map("action" -> "action_name", "param2" -> 2, "param3" -> Map("param4" -> "value
 ```
 
 To marshall Scala objects to JSON we are using an easy to use, light-weight library called [spray-json](https://github.com/spray/spray-json).
+There are efforts on its way to unify some of the Scala Json libraries currently available but until that time spray-json will do nicely. 
 The documentation of this library is pretty solid so there’s no need to go over the basics really. The feature we go into a bit deeper here is its
  (auto) conversion of standard Scala types to JSON including collections.
 
