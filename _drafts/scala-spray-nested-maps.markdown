@@ -10,10 +10,10 @@ Recently we developed a web client in Scala to start a Mendix application using 
 In this post I will explain how to convert nested `Map`s in Scala to JSON using the [spray-json](https://github.com/spray/spray-json) library.
 
 It is a basic example to show how easy it is the convert your own types to JSON using the default infrastructure provided by spray-json and
-at the same time works around an issue in the library where nested `Map`s are not supported. The source code is also included 
+at the same time we will work around an issue in the library where nested `Map`s are not supported. The source code is also included 
 as [a fully functional `sbt` project](https://github.com/lhohan/spray-json-pg) as well.
 
-A JSON command sent to the server (the Mendix Runtime) to execute an action typically looks like:
+To set the stage: a typical JSON command sent to the server (the Mendix Runtime) to execute an action typically looks like:
 
 ```javascript
 {
@@ -31,7 +31,7 @@ A JSON command sent to the server (the Mendix Runtime) to execute an action typi
 The `params` section is used to pass arguments for any potential action we support or may support in the future.
 Meaning it can contain a hierarchical structure.
 
-In Scala code we represent this structure not surprisingly with a `Map`:
+In Scala code we represent such a structure not surprisingly with a `Map`:
 
 ```scala
 Map("action" -> "action_name", "param2" -> 2, "param3" -> Map("param4" -> "value4"))
@@ -214,7 +214,7 @@ object M2eeJsonProtocol extends DefaultJsonProtocol {
 ```
 
 But doesn't this all seem to be nothing but a rephrasing, some syntactic rearrangement, of the same thing?
-It is and the above *only works in Scala 2.10* but when upgrading to Scala 2.11 the compiler has become smarter and figured it out:
+It is and the above *only works in Scala 2.10* and when upgrading to Scala 2.11 the compiler has become smarter and figures it out:
 
 ```scala
 [warn] .../src/main/scala/M2eeJsonProtocol.scala:12: non-variable type argument 
