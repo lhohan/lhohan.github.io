@@ -1,15 +1,17 @@
 ---
 layout: post
-title:  "Conversion of nested Maps using spray-json"
+title:  "Conversion of nested Maps to JSON in Scala using spray-json"
 category: scala
 categories: scala runtime spray
 author: hans_l'hoest
 ---
 
-Recently we developed a web client in Scala to start a Mendix application using only JSON commands similar as to how [m2ee-tools](https://github.com/mendix/m2ee-tools/) works.
-In this post I will explain how to convert nested `Map`s in Scala to JSON using the [spray-json](https://github.com/spray/spray-json) library.
+Recently we at Mendix developed a web client in Scala to start a Mendix application using only JSON commands similar as to how [m2ee-tools](https://github.com/mendix/m2ee-tools/) works.
 
-It is a basic example to show how easy it is the convert your own types to JSON using the default infrastructure provided by spray-json and
+While doing so we needed a way to convert nested Scala `Map`'s into JSON generically. 
+In this post I will explain how we implemented this using the [spray-json](https://github.com/spray/spray-json) library.
+
+It is a basic example to show how easy it is the convert your own types to JSON using the default infrastructure provided by [spray-json](https://github.com/spray/spray-json) and
 at the same time we will work around an issue in the library where nested `Map`s are not supported. The source code is also included 
 as [a fully functional `sbt` project](https://github.com/lhohan/spray-json-pg) as well.
 
@@ -17,27 +19,34 @@ To set the stage: a typical JSON command sent to the server (the Mendix Runtime)
 
 ```javascript
 {
-  action : "action_name"
-  params : {
-    param1 : "value1"
-    param2 : 2
-    param3 : {
-      param4 : "value4"
+  "action": "update_appcontainer_configuration",
+  "params": {
+    "runtime_port": "9080",
+    "runtime_jetty_options": {
+      "set_stats_on": "true"
     }
   }
 }
 ```
 
-The `params` section is used to pass arguments for any potential action we support or may support in the future.
+The `params` section is used to pass arguments for any potential `action` we support or may support in the future.
 Meaning it can contain a hierarchical structure.
 
-In Scala code we represent such a structure not surprisingly with a `Map`:
+In Scala code we may represent such a structure not surprisingly with a `Map`:
 
 ```scala
-Map("action" -> "action_name", "param2" -> 2, "param3" -> Map("param4" -> "value4"))
+Map(
+    "action" -> "update_appcontainer_configuration", 
+    "params" -> Map(
+      "runtime_port" -> "9080",
+      "runtime_jetty_options" -> Map(
+        "set_stats_on": "true"
+      )
+    )
+)
 ```
 
-To marshall Scala objects to JSON we are using an easy to use, light-weight library called [spray-json](https://github.com/spray/spray-json).
+To marshall Scala objects to JSON we decided to use the easy to use, light-weight library called [spray-json](https://github.com/spray/spray-json).
 There are efforts on its way to unify some of the Scala Json libraries currently available but until that time spray-json will do nicely. 
 The documentation of this library is pretty solid so there’s no need to go over the basics really. The feature we go into a bit deeper here is its
  (auto) conversion of standard Scala types to JSON including collections.
@@ -75,9 +84,9 @@ class JsonTest extends FunSuite {
 }
 ```
 
-(1): the expected result all in a one liner for convenience so we do not have to worry about new lines etc. for verifying the result.
+(1): the expected result all in a one liner for convenience so we do not have to worry about new lines etc. when verifying the result.
 
-(2): `toJson` converts to an JSON AST (see [spray-json](https://github.com/spray/spray-json) doc which explains this very clearly) and calling toString gives us a plain string with the JSON output.
+(2): `toJson` converts to an JSON AST and calling toString gives us a plain string with the JSON output.
 
 Running the test in `sbt` yields following error:
 
@@ -149,19 +158,16 @@ Running our test again:
 [info] All tests passed.
 ```
 
-Code project with failing test is [here] (https://github.com/lhohan/spray-json-pg/tree/e2cda87713d6f835d756acafe9fc8f247cb23b4b).
+Code project with failing test is [here] (https://github.com/lhohan/spray-json-pg/tree/e2cda87713d6f835d756acafe9fc8f247cb23b4b) and the one containing the fix is [here] (https://github.com/lhohan/spray-json-pg/tree/84dd18227e8a6c488a502e8dbab0d0acfc0cddfd).
 
-Code project with the fix is [here] (https://github.com/lhohan/spray-json-pg/tree/84dd18227e8a6c488a502e8dbab0d0acfc0cddfd).
-
-This concludes the main part of this post on our Scala classes into JSON. 
-(If you want to get rid of the compiler warning, keep on reading.)
+This concludes the main part of this post on converting our Scala classes into JSON. 
 
 In case of questions, suggestions or additions please to not hesitate to leave a comment or contact me.
 
-Addendum: removing the warning
+Getting rid of the warning
 ---------
 
-Off topic but you probably noticed the warning: 
+Off the main topic of this post but you probably noticed the warning: 
 
 ```scala
 [warn] .../src/main/scala/M2eeJsonProtocol.scala:10: non-variable type argument 
@@ -172,7 +178,7 @@ erasure
 [warn] one warning found
 ```
 
-As Scala is running on the jvm types are erased at runtime and the case pattern at (4) will not only match the `Map[String, Any]` type but *any* `Map` type.
+As Scala is running on the jvm types, are erased at runtime and the case pattern at (4) will not only match the `Map[String, Any]` type but *any* `Map` type.
 Since we know we are only matching for `Map`s with keys of type `String` we are not looking to deal with other typed `Map`s, if this would 
 happen it may crash with e.g. a ClassCastException but that's OK too, we'd rather crash hard in such cases. If we would want
 to cover our bases we might even write an extra test to capture this behaviour but that is not our goal now. We just want to
