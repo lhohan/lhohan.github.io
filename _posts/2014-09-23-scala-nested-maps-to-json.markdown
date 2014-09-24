@@ -190,7 +190,7 @@ There are various ways of removing this warning and it can get more complicated 
   - using manifest (but deprecated in Scala 2.10) 
   - using scalaz
   - using `TypeTag`s
-  - using `scala.reflect.runtime` but this is [strongly discouraged](http://www.scala-lang.org/news/2.11.1) (which I find somewhat confusing)
+  - using `scala.reflect.runtime`
 
 Most suggestions can be investigated more through following [stackoverflow question](http://stackoverflow.com/questions/1094173/how-do-i-get-around-type-erasure-on-scala-or-why-cant-i-get-the-type-paramete).
 
