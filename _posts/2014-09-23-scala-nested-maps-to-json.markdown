@@ -46,8 +46,7 @@ Map(
 )
 ```
 
-To marshall Scala objects to JSON we decided to use the easy to use, light-weight library called [spray-json](https://github.com/spray/spray-json).
-There are efforts on its way to unify some of the Scala Json libraries currently available but until that time spray-json will do nicely. 
+To marshall Scala objects to JSON we use [spray-json](https://github.com/spray/spray-json).
 The documentation of this library is pretty solid so there’s no need to go over the basics really. The feature we go into a bit deeper here is its
  (auto) conversion of standard Scala types to JSON including collections.
 
@@ -125,13 +124,13 @@ object M2eeJsonProtocol extends DefaultJsonProtocol {
 
 We implement a [JsonFormat](https://github.com/spray/spray-json#jsonprotocol) which is part of the default infrastructure `spray-json` provides to support custom conversions. 
 We extend JsonFormat parametrized with the type we want to convert, in our case `Map[String, Any]` (1). 
-We return a `JsObject` initialized with the result of mapping each element (2) meanwhile converting each `Map` value as needed to its appropriate `JsValue` object.
+We return a `JsObject` initialized with the result of mapping each element (2) to its appropriate `JsValue` object.
 As you can see, we explicitly convert `String` and `Int` (3).  
 Type `Map[String, Any]` (4) is handled recursively: this the main construct which makes our conversion work. 
 All other types we simply convert to a string (5); a further improvement could be to convert *any* type (say by using `toJson`), 
 but this suffices to make our test pass and JSON requests work in practice.
 
-The read part we do not need, so we leave it unimplemented (6).     
+The `read` method, converting JSON to Scala `Map`s we do not need, so we leave it unimplemented (6).     
 
 The only thing left to do is to bring this implicit converter into scope by adding an import statement (1) to our test class:
 
@@ -162,9 +161,8 @@ Code project with failing test is [here] (https://github.com/lhohan/spray-json-p
 
 This concludes the main part of this post on converting our Scala classes into JSON. 
 
-In case of questions, suggestions or additions please to not hesitate to leave a comment or contact me.
 
-Getting rid of the warning
+Getting rid of the compilation warning
 ---------
 
 Off the main topic of this post but you probably noticed the warning: 
@@ -178,23 +176,13 @@ erasure
 [warn] one warning found
 ```
 
-As Scala is running on the jvm types, are erased at runtime and the case pattern at (4) will not only match the `Map[String, Any]` type but *any* `Map` type.
-Since we know we are only matching for `Map`s with keys of type `String` we are not looking to deal with other typed `Map`s, if this would 
-happen it may crash with e.g. a ClassCastException but that's OK too, we'd rather crash hard in such cases. If we would want
-to cover our bases we might even write an extra test to capture this behaviour but that is not our goal now. We just want to
-get rid of the compiler warning.
+As Scala runs on the jvm, types are erased at runtime and the case pattern at (4) will not only match the `Map[String, Any]` type but *any* `Map` type.
+There are various ways in which we could try to remove this warning but things may get more complicated pretty fast depending on the route chosen (interesting but non trivial path might be [type tags](http://docs.scala-lang.org/overviews/reflection/typetags-manifests.html)). However in our
+case we do not have to go through great lengths to prevent this as other typed `Map`'s would generate invalid JSON anyway 
+(a named element in JSON, the keys in our `Map`s, must be a string) and things will crash unexpectedly further down the line anyway.
+One straightforward way to avoid unexpected errors would be to validate the input `Map` before marshalling but we focus here on removing the warning.  
 
-There are various ways of removing this warning and it can get more complicated pretty fast: 
-
-  - Matching on `Map[_,_]`, with or without checking all keys for `String` type, and make an explicit cast using `asInstanceOf` in the recursive call.
-  - using manifest (but deprecated in Scala 2.10) 
-  - using scalaz
-  - using `TypeTag`s
-  - using `scala.reflect.runtime`
-
-Most suggestions can be investigated more through following [stackoverflow question](http://stackoverflow.com/questions/1094173/how-do-i-get-around-type-erasure-on-scala-or-why-cant-i-get-the-type-paramete).
-
-Ideally I would like [this Scala improvement](https://issues.scala-lang.org/browse/SI-6517) but a rather easy fix is this:
+In Scala 2.10 we can the following:
 
 ```scala
 import spray.json._
@@ -219,8 +207,7 @@ object M2eeJsonProtocol extends DefaultJsonProtocol {
 
 ```
 
-But doesn't this all seem to be nothing but a rephrasing, some syntactic rearrangement, of the same thing?
-It is and the above *only works in Scala 2.10* and when upgrading to Scala 2.11 the compiler has become smarter and figures it out:
+This removes the warning but in Scala 2.11 the compiler figures out we only shifted the issue elsewhere:
 
 ```scala
 [warn] .../src/main/scala/M2eeJsonProtocol.scala:12: non-variable type argument 
@@ -232,11 +219,14 @@ by erasure
 [warn] one warning found
 ```
 
-Our [quick, relatively straight-forward, however not-the-most-elegant fix](https://github.com/lhohan/spray-json-pg/tree/bd518fd7e0217ac3b5473aa4b016083826b744ff) then would be to replace (4) with:
+A less elegant but, nevertheless, pretty clear and effective solution then would be to replace (4) with:
 
 ```scala
 case v: Map[_, _] => write(v.asInstanceOf[Map[String, Any]])  // 4
 ```
 
-This removes the warning in both Scala 2.10 and 2.11. If one day we revisit this item and a more elegant solution
-comes up we'll keep you posted.
+This removes the warning in both Scala 2.10 and 2.11. 
+
+The project without the warning is [here](https://github.com/lhohan/spray-json-pg/tree/bd518fd7e0217ac3b5473aa4b016083826b744ff). 
+
+In case of questions or suggestions please do not hesitate to leave a comment.
