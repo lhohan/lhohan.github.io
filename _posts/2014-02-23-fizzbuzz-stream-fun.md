@@ -4,6 +4,8 @@ title:  "FizzBuzz Stream fun"
 categories: scala
 ---
 
+*Updated with a more functional implementation of FizzBuzz November 2015*
+
 [FizzBuzz](http://en.wikipedia.org/wiki/Fizz_buzz) fun in Scala using Scala
 [Streams](http://www.scala-lang.org/api/current/index.html#scala.collection.immutable.Stream).
 
@@ -37,4 +39,19 @@ As a little extra, this is how we could test our FizzBuzz implementation using [
 
 {% gist lhohan/9039481 %}
 
+*A more functional implementation of FizzBuzz (added November 2015)*
+
+Thanks to [Dierk König's implementation in Frege][frege]:
+
+{% gist lhohan/4eab1c83f7e9e17216b3 %}
+
+What I like about this implementation: 
+
+- Much less conditionals. There is only 1 compared to 4 in the first implementation. And the order matters in the latter, if I do not put the `i % 15 == 0` check first the logic will fall apart. So if changes need to be made it is easier to introduce bugs in the one containing more conditionals.
+- The code can be more easily built incrementally using the REPL. It just *flows* nicer. The `shout` method needs to be entered in one go, all or nothing.
+- Closer to the specification. Consider the `i % 15 == 0` check in the first implementation a bit more: to fit the FizzBuzz specification better it would be more accurate to write it as  `i % 3 == 0 ||  i % 5 == 0`. This would up the conditional checks to 5 though. At first sight the concatenation in the functional implementation felt like a lucky shot, but in fact it fits exactly the specifaction of FizzBuzz: I suppose it is no coincidence we are shouting 'FizzBuzz', a concatentation, instead of 'Boo!'.
+
+Note there is also `zipWithIndex` in Scala but I maintained the same "`zip` and `map`"-logic to keep the code more consistent and hence more simple.
+
+[frege]: https://dierk.gitbooks.io/fregegoodness/content/src/docs/asciidoc/fizzbuzz.html
 

@@ -1,3 +1,4 @@
 name: hanlho
+gems: ["jekyll-gist"]
 markdown: redcarpet
 highlighter: true
