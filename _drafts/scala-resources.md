@@ -9,7 +9,7 @@ I also hear great things about Atomic Scala.
 Sites:
 
 - http://scala-exercises.47deg.com/
-- http://exercism.io/ next time I learn another language from scratch I may use this site too
+- http://exercism.io/ next time I learn another language from scratch I may use this site too. I was surprised how much you can learn by reviewing and 'nit picking' other people's code. Also it keep you up to date with things you may not need daily, for example: enumerations are pretty basic but if you do not need to write them for months it's good to write them once in a while.
 
 ## Functional programming:
 
