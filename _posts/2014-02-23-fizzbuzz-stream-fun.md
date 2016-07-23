@@ -5,6 +5,7 @@ categories: scala
 ---
 
 *Updated with a more functional implementation of FizzBuzz November 2015*
+*Updated with a link to an implementation using `Monoids` July 2016*
 
 [FizzBuzz](http://en.wikipedia.org/wiki/Fizz_buzz) fun in Scala using Scala
 [Streams](http://www.scala-lang.org/api/current/index.html#scala.collection.immutable.Stream).
@@ -53,5 +54,10 @@ What I like about this implementation:
 
 Note there is also `zipWithIndex` in Scala but I maintained the same "`zip` and `map`"-logic to keep the code more consistent and hence more simple.
 
+*[A Fizzbuzz implementation using `Monoids` (Added July 2016)](monoid_example)* When time permits
+I may expand this post with this example.
+
+
 [frege]: https://dierk.gitbooks.io/fregegoodness/content/src/docs/asciidoc/fizzbuzz.html
+[monoid_example]: https://www.reddit.com/r/scala/comments/45gqpd/whats_a_monoid/czy732k
 
