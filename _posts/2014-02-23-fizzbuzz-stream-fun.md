@@ -5,6 +5,8 @@ categories: scala
 ---
 
 *Updated with a more functional implementation of FizzBuzz November 2015*
+
+
 *Updated with a link to an implementation using `Monoids` July 2016*
 
 [FizzBuzz](http://en.wikipedia.org/wiki/Fizz_buzz) fun in Scala using Scala
@@ -54,8 +56,11 @@ What I like about this implementation:
 
 Note there is also `zipWithIndex` in Scala but I maintained the same "`zip` and `map`"-logic to keep the code more consistent and hence more simple.
 
-*[A Fizzbuzz implementation using `Monoids` (Added July 2016)](monoid_example)* When time permits
-I may expand this post with this example.
+*A functional implementation using `Monoids` (Added July 2016)* 
+
+Monoids also provide a way of implementing FizzBuzz in a more functional way, check it out [here](monoid_example). 
+At the moment I do not have the time to go into detail but it is a nice example of practical use
+ of monoids.
 
 
 [frege]: https://dierk.gitbooks.io/fregegoodness/content/src/docs/asciidoc/fizzbuzz.html
